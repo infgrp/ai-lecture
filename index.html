@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대답하는 AI에서 일하는 AI로 — 유익승 특강</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A2E66; --ink-soft:#33517E; --paper:#E9F3FD; --card:#FFFFFF;
+  --seal:#1E88E5; --seal-soft:#D6E9FB; --teal:#0D47A1; --teal-soft:#BBDEFB;
+  --line:#C6DCF2; --mono:'IBM Plex Mono',monospace;
+  --serif:'Noto Serif KR',serif; --sans:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.72;font-size:16px}
+::selection{background:var(--seal);color:#fff}
+
+/* ---------- 진행 막대·내비·카운터 ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--seal);z-index:100;transition:width .15s linear}
+nav#toc{position:fixed;top:0;left:0;right:0;z-index:90;background:rgba(246,247,243,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:2px;padding:0 14px;overflow-x:auto;scrollbar-width:none}
+nav#toc::-webkit-scrollbar{display:none}
+nav#toc .brand{font-family:var(--serif);font-weight:900;font-size:.85rem;white-space:nowrap;padding:11px 14px 11px 0;border-right:1px solid var(--line);margin-right:8px}
+nav#toc a{font-size:.76rem;color:var(--ink-soft);text-decoration:none;padding:11px 9px;white-space:nowrap;border-bottom:2px solid transparent}
+nav#toc a.active{color:var(--seal);border-bottom-color:var(--seal);font-weight:700}
+nav#toc a:hover{color:var(--ink)}
+#counter{position:fixed;right:18px;bottom:18px;z-index:95;font-family:var(--mono);font-size:.75rem;background:var(--ink);color:#F4F9FF;border-radius:20px;padding:6px 14px;letter-spacing:.06em;pointer-events:none;opacity:.9}
+#counter .ch{color:#9BD0F8;margin-right:8px;font-family:var(--sans)}
+#navBtns{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:95;display:flex;flex-direction:column;gap:8px}
+#navBtns button{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--ink);background:rgba(255,255,255,.85);color:var(--ink);font-size:1rem;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px)}
+#navBtns button:hover{background:var(--seal);border-color:var(--seal);color:#fff}
+.hint{position:fixed;left:18px;bottom:18px;z-index:95;font-size:.7rem;color:var(--ink-soft);opacity:.75;pointer-events:none}
+
+/* ---------- 프레임 ---------- */
+section.frame{min-height:100svh;display:flex;align-items:center;scroll-snap-align:start;padding:74px 60px 64px 28px;position:relative}
+section.frame>.fwrap{max-width:1000px;margin:0 auto;width:100%}
+section.frame.dark{background:linear-gradient(160deg,#0D47A1 0%,#1565C0 55%,#1E88E5 115%);color:#F4F9FF}
+section.frame.dark .card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.2)}
+section.frame.dark .card h3{color:#F4F9FF}
+section.frame.dark .card p,section.frame.dark .card li{color:#D8E9FB}
+
+/* 프레임 진입 시 순차 등장 */
+.fx{opacity:0;transform:translateY(34px);transition:opacity .65s ease,transform .65s ease;transition-delay:calc(var(--i,0)*110ms)}
+section.frame.active .fx{opacity:1;transform:none}
+h2.title .rule{display:block;width:0;height:3px;background:var(--seal);margin-top:10px;transition:width .8s ease .3s}
+section.frame.active h2.title .rule{width:76px}
+
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:.78rem;letter-spacing:.14em;color:var(--seal);font-weight:700;margin-bottom:12px;text-transform:uppercase}
+.eyebrow .stamp{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid var(--seal);color:var(--seal);font-family:var(--serif);font-weight:900;font-size:.85rem;border-radius:4px;transform:rotate(-3deg)}
+h2.title{font-family:var(--serif);font-size:clamp(1.4rem,3.2vw,2rem);font-weight:900;line-height:1.35;margin-bottom:10px}
+p.sub{color:var(--ink-soft);margin-bottom:20px;font-size:.98rem}
+.timechip{display:inline-block;font-family:var(--mono);font-size:.72rem;background:var(--ink);color:#fff;border-radius:20px;padding:2px 12px;vertical-align:middle;margin-left:10px}
+
+/* ---------- 카드·그리드 ---------- */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;position:relative;transition:transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(13,71,161,.14)}
+.card h3{font-family:var(--serif);font-size:1.02rem;font-weight:700;margin-bottom:8px}
+.card p,.card li{font-size:.9rem;color:var(--ink-soft)}
+.card .big{font-family:var(--serif);font-size:1.6rem;color:var(--seal);font-weight:900;display:block;margin-bottom:6px}
+ul.plain{list-style:none}
+ul.plain li{padding:4px 0 4px 22px;position:relative}
+ul.plain li::before{content:"";position:absolute;left:4px;top:.95em;width:8px;height:2px;background:var(--seal)}
+.callout{border-left:4px solid var(--seal);background:var(--seal-soft);padding:14px 18px;border-radius:0 10px 10px 0;margin-top:18px;font-size:.93rem;color:var(--ink)}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft)}
+.quote{font-family:var(--serif);font-size:clamp(1.15rem,2.6vw,1.5rem);font-weight:700;line-height:1.75;text-align:center;padding:24px 12px}
+.quote em{font-style:normal;color:var(--seal);border-bottom:3px solid var(--seal)}
+.frame.dark .quote em{color:#9BD0F8;border-color:#9BD0F8}
+
+/* ---------- 표 ---------- */
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:.88rem;box-shadow:0 1px 0 var(--line);color:var(--ink)}
+th{background:var(--ink);color:#fff;font-weight:500;text-align:left;padding:10px 14px;font-size:.83rem}
+td{padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+tr:hover td{background:#FBFBF7}
+td .ph{font-family:var(--mono);font-size:.82rem;color:var(--teal)}
+
+/* ---------- 프롬프트 블록: 라벨을 상자 안 첫 줄로 ---------- */
+.prompt{font-family:var(--mono);font-size:.85rem;background:#0D3775;color:#EAF4FF;border-radius:12px;padding:16px 20px 18px;line-height:1.75;white-space:pre-wrap;word-break:break-word;margin-top:6px}
+.prompt::before{content:attr(data-label);display:inline-block;background:var(--seal);color:#fff;font-size:.66rem;letter-spacing:.1em;padding:2px 10px;border-radius:12px;font-family:var(--sans);margin-bottom:10px;white-space:nowrap}
+.prompt.good::before{background:var(--teal)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.col-bad,.col-good{background:var(--card);border-radius:12px;padding:18px 20px;border-top:4px solid var(--line)}
+.col-bad{border-top-color:var(--seal)}
+.col-good{border-top-color:var(--teal)}
+.col-bad h4{color:var(--seal)}.col-good h4{color:var(--teal)}
+.col-bad h4,.col-good h4{font-size:.93rem;margin-bottom:8px}
+.col-bad p,.col-good p,.col-bad li,.col-good li{font-size:.88rem;color:var(--ink-soft)}
+
+/* ---------- 흐름도·단계 ---------- */
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin:20px 0}
+.flow .node{background:var(--card);border:1.5px solid var(--ink);border-radius:10px;padding:9px 15px;font-size:.84rem;font-weight:500;text-align:center;box-shadow:3px 3px 0 var(--line);color:var(--ink)}
+.flow .node small{display:block;font-weight:400;color:var(--ink-soft);font-size:.71rem}
+.flow .arrow{color:var(--seal);font-size:1.15rem;font-weight:900;padding:0 3px}
+.flow .node.hot{border-color:var(--seal);background:var(--seal-soft)}
+.steps{counter-reset:s;display:grid;gap:10px}
+.steps .step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px 13px 60px;position:relative;counter-increment:s;color:var(--ink)}
+.steps .step::before{content:counter(s);position:absolute;left:15px;top:13px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--serif);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.steps .step b{font-size:.92rem}
+.steps .step p{font-size:.85rem;color:var(--ink-soft)}
+
+/* ---------- 토큰 ---------- */
+.tokline{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:14px 0}
+.tok{font-family:var(--mono);font-size:.92rem;background:#fff;border:1.5px solid var(--ink);border-radius:8px;padding:4px 11px;box-shadow:2px 2px 0 var(--line);transition:transform .2s,background .2s;color:var(--ink)}
+.tok:hover{transform:translateY(-3px) rotate(-1deg);background:var(--seal-soft);border-color:var(--seal)}
+.tok.gen{opacity:0;transform:scale(.6)}
+.tok.gen.pop{opacity:1;transform:scale(1);transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+#heroTokens .tok{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.4);color:#F4F9FF;box-shadow:none}
+#heroTokens .tok.pop{background:rgba(33,150,243,.45);border-color:var(--seal)}
+.cursorbar{display:inline-block;width:10px;height:1.2em;background:var(--seal);vertical-align:text-bottom;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- Attention ---------- */
+.attn{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:16px 0}
+.attn .w{font-size:.98rem;padding:5px 11px;border-radius:8px;border:1.5px dashed transparent;transition:all .25s;cursor:default}
+.attn .w[data-a="3"]{background:var(--seal);color:#fff;font-weight:700}
+.attn.armed .w[data-a="2"]{background:var(--seal-soft);border-color:var(--seal)}
+.attn.armed .w[data-a="1"]{background:var(--teal-soft);border-color:var(--teal)}
+.btn{font-family:var(--sans);font-size:.83rem;border:1.5px solid var(--seal);color:var(--seal);background:none;border-radius:20px;padding:6px 18px;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--seal);color:#fff}
+.btn.t{border-color:var(--teal);color:var(--teal)}
+.btn.t:hover{background:var(--teal);color:#fff}
+
+/* ---------- O/X ---------- */
+.quiz{display:grid;gap:10px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;transition:border-color .2s;color:var(--ink)}
+.q:hover{border-color:var(--ink)}
+.q .qt{font-size:.9rem}
+.q .ans{font-family:var(--serif);font-weight:900;font-size:1.1rem;min-width:70px;text-align:center;border-radius:8px;padding:4px 10px;background:var(--line);color:transparent;transition:all .3s;user-select:none}
+.q.open .ans.o{background:var(--teal);color:#fff}
+.q.open .ans.x{background:var(--seal);color:#fff}
+.q .why{display:none;font-size:.8rem;color:var(--ink-soft);margin-top:5px}
+.q.open .why{display:block}
+.q .qbody{flex:1}
+
+/* ---------- 체크리스트 ---------- */
+.checks{display:grid;gap:8px}
+.checks label{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 15px;cursor:pointer;font-size:.88rem;transition:background .2s;color:var(--ink)}
+.checks input{margin-top:4px;accent-color:var(--teal);width:16px;height:16px;flex-shrink:0}
+.checks label:has(input:checked){background:var(--teal-soft);border-color:var(--teal)}
+.checks label:has(input:checked) span{text-decoration:line-through;color:var(--ink-soft)}
+
+/* ---------- 여섯 요소 ---------- */
+.six{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.six .el{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;transition:all .25s;color:var(--ink)}
+.six .el:hover{border-color:var(--seal);transform:translateY(-4px);box-shadow:0 10px 24px rgba(33,150,243,.20)}
+.six .el .hanja{font-family:var(--serif);font-size:1.8rem;font-weight:900;color:var(--seal);display:block;line-height:1.2}
+.six .el b{font-size:.98rem}
+.six .el p{font-size:.83rem;color:var(--ink-soft);margin-top:4px}
+
+/* ---------- 도표·수식·부록 ---------- */
+.fig{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0;color:var(--ink)}
+.fig figcaption{font-size:.8rem;color:var(--ink-soft);text-align:center;margin-top:8px}
+.formula{font-family:var(--mono);text-align:center;font-size:clamp(.88rem,2.3vw,1.1rem);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 14px;margin:16px 0;color:var(--ink)}
+.formula .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 6px}
+.formula .frac span:first-child{border-bottom:1.5px solid var(--ink);padding:0 8px}
+details.appx{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;color:var(--ink)}
+details.appx summary{cursor:pointer;padding:13px 18px;font-weight:700;font-family:var(--serif);list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:.95rem}
+details.appx summary::after{content:"+";font-size:1.25rem;color:var(--seal);transition:transform .25s}
+details.appx[open] summary::after{transform:rotate(45deg)}
+details.appx .body{padding:0 18px 16px;font-size:.87rem;color:var(--ink-soft)}
+
+/* ---------- 히어로 ---------- */
+section.frame.hero{background:linear-gradient(160deg,#0D47A1 0%,#1565C0 45%,#2196F3 100%);color:#F4F9FF;overflow:hidden}
+.hero .glow{position:absolute;width:70vmax;height:70vmax;right:-25vmax;top:-30vmax;background:radial-gradient(circle,rgba(142,201,245,.45) 0%,rgba(142,201,245,0) 65%);pointer-events:none}
+.hero .kicker{font-size:.83rem;letter-spacing:.1em;color:#BFDCF7;margin-bottom:20px}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(2rem,6vw,3.8rem);line-height:1.3}
+.hero h1 .accent{color:#9BD0F8}
+.hero .meta{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px;font-size:.83rem;color:#BFDCF7}
+.hero .meta span{border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 14px}
+#heroTokens{margin-top:40px;justify-content:flex-start;min-height:52px}
+.hero .gridbg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.scrolldown{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-size:.72rem;color:#BFDCF7;letter-spacing:.2em;animation:bob 2s ease-in-out infinite}
+@keyframes bob{50%{transform:translate(-50%,8px)}}
+
+/* ---------- 반응형·모션 축소 ---------- */
+@media(max-width:760px){
+  html{scroll-snap-type:y proximity}
+  .g2,.g3,.six,.vs,.twocol{grid-template-columns:1fr}
+  section.frame{padding:70px 16px 70px;min-height:auto}
+  body{font-size:15px}
+  #navBtns{display:none}
+  .hint{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-snap-type:none;scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+  .fx{opacity:1;transform:none}
+  section.frame h2.title .rule{width:76px}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="toc">
+  <span class="brand">일하는 AI</span>
+  <a href="#top">표지</a><a href="#s0">도입</a><a href="#s1">01 결과 차이</a><a href="#s2">02 원리</a><a href="#s3">03 오류</a><a href="#s4">04 학습·추론</a><a href="#s5">05 여섯 요소</a><a href="#s6">06 실습</a><a href="#s7">07 MCP</a><a href="#s8">08 Excel</a><a href="#s9">09 HWP</a><a href="#s10">10 마무리</a><a href="#appx">부록</a>
+</nav>
+<div id="navBtns"><button id="btnPrev" aria-label="이전 프레임">↑</button><button id="btnNext" aria-label="다음 프레임">↓</button></div>
+<div id="counter"><span class="ch"></span><span class="num"></span></div>
+<div class="hint">↑↓ · Space · PgUp/PgDn 으로 이동</div>
+
+<!-- ═══ 표지 ═══ -->
+<section class="frame hero" id="top" data-ch="표지">
+  <div class="gridbg"></div><div class="glow"></div>
+  <div class="fwrap">
+    <p class="kicker fx">교육기관 연구사·장학사·문서 행정 실무자 대상 3시간 특강 · 강사 유익승 · 15:00–18:00</p>
+    <h1 class="fx">대답하는 AI에서<br><span class="accent">일하는 AI</span>로</h1>
+    <div class="meta fx"><span>LLM의 작동 원리</span><span>좋은 프롬프트</span><span>MCP를 이용한 HWP·Excel 업무 자동화</span></div>
+    <div class="tokline fx" id="heroTokens"></div>
+  </div>
+  <div class="scrolldown">SCROLL ▾</div>
+</section>
+
+<!-- ═══ 도입 ═══ -->
+<section class="frame" id="s0" data-ch="도입">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">導</span>오늘 얻어 갈 세 가지</span>
+    <h2 class="title">목표는 AI에게 일을 넘기는 것이 아니라,<br>안전한 업무 분담을 설계하는 것이다<span class="rule"></span></h2></div>
+    <div class="grid g3" style="margin-top:22px">
+      <div class="card fx"><span class="big">原</span><h3>원리 이해</h3><p>LLM이 문맥을 읽고 다음 토큰을 생성하는 방식을 실무 수준에서 이해한다.</p></div>
+      <div class="card fx"><span class="big">指</span><h3>업무 지시 설계</h3><p>목적·맥락·자료·형식·기준·검증으로 프롬프트를 설계한다.</p></div>
+      <div class="card fx"><span class="big">行</span><h3>도구 실행과 검증</h3><p>MCP를 통해 Excel·HWP 작업을 실행하고 결과를 검산한다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="도입">
+  <div class="fwrap">
+    <h2 class="title fx">3시간의 전체 여정<span class="rule"></span></h2>
+    <div class="flow fx">
+      <div class="node">원리<small>Token · Attention</small></div><span class="arrow">→</span>
+      <div class="node">한계<small>KV cache · 오류</small></div><span class="arrow">→</span>
+      <div class="node">지시<small>좋은 프롬프트</small></div><span class="arrow">→</span>
+      <div class="node hot">행동<small>MCP · 파일 작업</small></div>
+    </div>
+    <div class="callout fx">하나의 질문으로 연결한다. <b>LLM은 어떻게 답을 만들며, 그 성질을 이해하면 어떻게 더 명료하고 안전한 업무를 맡길 수 있는가?</b></div>
+  </div>
+</section>
+
+<section class="frame" data-ch="도입">
+  <div class="fwrap">
+    <h2 class="title fx">권장 시간표: 15:00–18:00<span class="rule"></span></h2>
+    <div class="fx"><table>
+      <tr><th style="width:140px">시간</th><th style="width:180px">주제</th><th>핵심 활동</th></tr>
+      <tr><td>15:00–15:58</td><td>도입과 LLM 원리</td><td>결과 비교, 토큰·임베딩·Transformer·Attention</td></tr>
+      <tr><td>15:58–16:18</td><td>오류와 학습/추론</td><td>KV cache, 긴 문맥, 환각, 학습과 추론 구분</td></tr>
+      <tr><td>16:18–16:58</td><td>프롬프트 여섯 요소</td><td>설명과 업무 프롬프트 개선</td></tr>
+      <tr><td>16:58–17:08</td><td>MCP</td><td>자연어 판단과 외부 도구 실행의 연결</td></tr>
+      <tr><td>17:08–17:33</td><td>Excel MCP</td><td>원본 보존, 오류표, 요약표, 저장과 검산</td></tr>
+      <tr><td>17:33–17:53</td><td>HWP MCP</td><td>템플릿 확인, 자리표시자 교체, 새 문서 저장</td></tr>
+      <tr><td>17:53–18:00</td><td>마무리</td><td>역할 분담과 검증 원칙 회수</td></tr>
+    </table></div>
+    <div class="callout teal fx">운영 원칙: 설치와 환경 오류는 강의 전에 해결하고, 현장에서는 개념과 업무 흐름에 집중한다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="도입">
+  <div class="fwrap">
+    <h2 class="title fx">실습 전 체크: 실패를 강의 밖으로 옮기기<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:20px">
+      <div class="col-good fx"><h4>강사 환경</h4><ul class="plain">
+        <li>AI 클라이언트 로그인 및 사용량 확인</li><li>Excel·HWP와 MCP 서버 연결 시험</li><li>가상 데이터와 템플릿 준비</li><li>단계별 중간 결과 파일 준비</li><li>강사 시연용 예비 컴퓨터 확보</li></ul></div>
+      <div class="col-bad fx"><h4>강의 중 하지 않을 것</h4><ul class="plain">
+        <li>Python·Node.js를 처음 설치하기</li><li>실제 개인정보로 실습하기</li><li>원본 파일을 직접 수정하기</li><li>삭제·전송·덮어쓰기를 자동 승인하기</li><li>연결 오류를 끝까지 현장에서 추적하기</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 01 ═══ -->
+<section class="frame" id="s1" data-ch="01 결과 차이">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">01</span>같은 AI인데 왜 결과가 다른가<span class="timechip">8분</span></span>
+    <h2 class="title">같은 자료, 다른 프롬프트<span class="rule"></span></h2>
+    <p class="sub">입력 조건이 결과의 방향과 활용 가능성을 바꾼다.</p></div>
+    <div class="vs">
+      <div class="fx"><div class="prompt" data-label="프롬프트 A">이 자료를 요약해 줘.</div><p style="font-size:.82rem;color:var(--ink-soft);margin-top:8px;text-align:center">대상·형식·판단 기준이 비어 있음</p></div>
+      <div class="fx"><div class="prompt good" data-label="프롬프트 B">교육기관 내부 회의용으로 정리하라.
+1. 요청 사항
+2. 즉시 조치할 사항
+3. 추가 확인이 필요한 사실
+4. 다음 협의 전 준비할 일
+기록에 없는 내용은 "확인 필요"로 표시하라.</div><p style="font-size:.82rem;color:var(--teal);margin-top:8px;text-align:center">어느 결과가 실제 업무에 바로 쓰일까?</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="01 결과 차이">
+  <div class="fwrap">
+    <h2 class="title fx">두 번째 결과가 유용한 이유<span class="rule"></span></h2>
+    <div class="flow fx">
+      <div class="node">목적</div><div class="node">맥락·대상</div><div class="node">출력 형식</div><div class="node">근거 범위</div><div class="node hot">검증 규칙</div>
+    </div>
+    <div class="callout fx">두 번째 프롬프트가 좋은 이유는 길어서가 아니라, <b>AI가 판단해야 할 방향을 분명히 제시했기 때문</b>이다.</div>
+    <div class="callout teal fx"><b>질문</b> — 프롬프트 B에서 삭제해도 되는 정보와 반드시 남겨야 하는 정보는 무엇인가?</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="01 결과 차이">
+  <div class="fwrap">
+    <p class="fx" style="text-align:center;font-size:.85rem;letter-spacing:.14em;color:var(--seal);font-weight:700">오늘의 중심 문장</p>
+    <div class="quote fx">LLM은 앞에 주어진 문맥을 바탕으로<br><em>다음 토큰을 하나씩 선택한다</em>.</div>
+    <p class="fx" style="text-align:center;font-size:.95rem;color:var(--ink-soft)">좋은 결과를 얻으려면 목적·맥락·자료·형식·기준·검증을 문맥 안에 분명히 넣어야 한다.</p>
+  </div>
+</section>
+
+<!-- ═══ 02 ═══ -->
+<section class="frame" id="s2" data-ch="02 원리">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">02</span>LLM은 문장을 어떻게 읽고 쓰는가<span class="timechip">35분</span></span>
+    <h2 class="title">1. 문장을 토큰으로 나눈다<span class="rule"></span></h2></div>
+    <div class="fig fx">
+      <p style="text-align:center;font-size:1.02rem">교육지원청은 학교의 교육 활동을 지원한다.</p>
+      <p style="text-align:center;color:var(--seal);font-weight:700;margin:6px 0">↓ 토큰화 <span style="font-size:.76rem;color:var(--ink-soft);font-weight:400">(토큰에 마우스를 올려 보자)</span></p>
+      <div class="tokline"><span class="tok">교육</span><span class="tok">지원</span><span class="tok">청은</span><span class="tok">학교의</span><span class="tok">교육</span><span class="tok">활동을</span><span class="tok">지원</span><span class="tok">한다</span><span class="tok">.</span></div>
+      <figcaption>토큰은 우리가 생각하는 "한 단어"와 항상 같지 않다. 낯선 이름, 합성어, 띄어쓰기와 문장부호도 분할에 영향을 준다.</figcaption>
+    </div>
+    <div class="grid g3">
+      <div class="card fx"><h3>고유명사</h3><p>기관명·사업명·사람 이름은 여러 조각으로 나뉘어 오인될 수 있다.</p></div>
+      <div class="card fx"><h3>문맥 길이</h3><p>문자 수가 같아도 토큰 수와 처리 비용은 달라질 수 있다.</p></div>
+      <div class="card fx"><h3>명시적 표현</h3><p>약어와 내부 용어는 뜻을 함께 써야 정확히 연결된다.</p></div>
+    </div>
+    <div class="callout fx">AI가 단어를 사람과 똑같이 읽는다고 가정하지 않는다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="02 원리">
+  <div class="fwrap">
+    <h2 class="title fx">2. 토큰을 임베딩 공간의 좌표로 바꾼다<span class="rule"></span></h2>
+    <div class="fig fx">
+      <svg viewBox="0 0 640 270" style="width:100%;height:auto" role="img" aria-label="임베딩 공간 산점도">
+        <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#0A2E66" stroke-width="1.4"/></marker></defs>
+        <line x1="50" y1="235" x2="610" y2="235" stroke="#0A2E66" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="50" y1="235" x2="50" y2="18" stroke="#0A2E66" stroke-width="1.4" marker-end="url(#ah)"/>
+        <ellipse cx="180" cy="110" rx="118" ry="80" fill="#BBDEFB" opacity=".7"/>
+        <ellipse cx="490" cy="175" rx="100" ry="60" fill="#D6E9FB" opacity=".7"/>
+        <g font-family="Noto Sans KR" font-size="17">
+          <circle cx="140" cy="82" r="6" fill="#0D47A1"/><text x="154" y="87">학교</text>
+          <circle cx="220" cy="120" r="6" fill="#0D47A1"/><text x="234" y="125">교실</text>
+          <circle cx="160" cy="152" r="6" fill="#0D47A1"/><text x="174" y="157">교사</text>
+          <circle cx="455" cy="158" r="6" fill="#42A5F5"/><text x="469" y="163">냉장고</text>
+          <circle cx="510" cy="198" r="6" fill="#42A5F5"/><text x="524" y="203">세탁기</text>
+        </g>
+      </svg>
+      <figcaption>각 토큰은 많은 숫자로 이루어진 벡터로 바뀐다. 비슷한 문맥에서 나타나는 표현은 일정한 관계를 형성하고, 실제 공간은 수백·수천 차원이며, 표현은 Transformer 층을 지나며 문맥에 따라 계속 변화한다.</figcaption>
+    </div>
+    <div class="twocol">
+      <div class="col-good fx"><h4>도움이 되는 설명</h4><p>모델은 대규모 문장에서 반복적으로 나타난 관계를 수치적 구조로 압축한다.</p></div>
+      <div class="col-bad fx"><h4>피해야 할 설명</h4><p>"뜻이 같은 단어는 항상 바로 옆에 저장된다."</p></div>
+    </div>
+    <div class="callout fx">프롬프트에 기관의 상황과 전문 용어의 뜻을 넣는 이유는, 토큰 사이의 관계를 현재 업무의 문맥에 맞게 형성하도록 돕기 위해서이다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="02 원리">
+  <div class="fwrap">
+    <h2 class="title fx">3. Transformer는 관계를 여러 층에서 바꾼다<span class="rule"></span></h2>
+    <div class="flow fx">
+      <div class="node">입력 토큰<small>+ 위치 정보</small></div><span class="arrow">→</span>
+      <div class="node">Attention</div><span class="arrow">→</span>
+      <div class="node">정보 변환</div><span class="arrow">→</span>
+      <div class="node">Attention</div><span class="arrow">→</span>
+      <div class="node">정보 변환</div><span class="arrow">→</span>
+      <div class="node hot">다음 토큰의 확률</div>
+    </div>
+    <p class="fx" style="text-align:center;font-size:.85rem;color:var(--ink-soft)">⟲ 여러 층 반복</p>
+    <div class="callout fx">Transformer는 토큰을 한 번 읽고 끝내지 않는다. 각 층에서 주변 토큰과의 관계를 반영하여 표현을 갱신한다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="02 원리">
+  <div class="fwrap">
+    <h2 class="title fx">4. Attention은 현재 판단에 필요한 앞부분을 참고한다<span class="rule"></span></h2>
+    <div class="fig fx">
+      <div class="attn" id="attnDemo">
+        <span class="w" data-a="1">학교는</span><span class="w" data-a="2">행정지원팀에</span><span class="w" data-a="1">자료</span><span class="w" data-a="1">정리를</span><span class="w" data-a="1">요청했다</span><span class="w" data-a="3">그 부서는</span>
+      </div>
+      <p style="text-align:center"><button id="attnBtn" class="btn">참고 강도 보기</button></p>
+      <figcaption>"그 부서는"을 처리할 때 앞의 여러 토큰 가운데 무엇을 얼마나 참고할지를 계산한다. Attention은 인간의 의식적 집중이나 참된 이해가 아니라, 학습된 수치적 관계에 따라 정보를 가중해 섞는 계산이다.</figcaption>
+    </div>
+    <div class="twocol">
+      <div class="col-bad fx"><h4>지시와 자료를 섞은 구조 없는 긴 입력</h4><ul class="plain"><li>핵심 지시가 참고 자료에 묻힘</li><li>오래된 조건과 새 조건이 충돌</li><li>출력 형식이 암시적으로만 존재</li><li>어떤 근거를 사용했는지 확인하기 어려움</li></ul></div>
+      <div class="col-good fx"><h4>구조화된 입력</h4><ul class="plain"><li>목적과 핵심 지시를 앞에 배치</li><li>자료 범위를 구분해 제공</li><li>출력 형식과 기준을 명시</li><li>끝에서 검증 조건을 확인</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="02 원리">
+  <div class="fwrap">
+    <h2 class="title fx">5. 결과는 한 토큰씩 생성된다<span class="rule"></span></h2>
+    <div class="fig fx">
+      <div class="flow" style="margin:6px 0">
+        <div class="node">프롬프트</div><span class="arrow">→</span>
+        <div class="node">다음 토큰 확률 계산</div><span class="arrow">→</span>
+        <div class="node hot">토큰 1 선택</div><span class="arrow">→</span>
+        <div class="node">다음 토큰 확률 계산</div><span class="arrow">→</span>
+        <div class="node hot">토큰 2 선택</div><span class="arrow">→</span>
+        <div class="node">반복</div>
+      </div>
+      <p style="text-align:center;font-size:.84rem;color:var(--ink-soft)">⟲ 생성한 토큰을 문맥에 추가</p>
+      <p style="text-align:center;margin-top:6px"><button id="genBtn" class="btn t">생성 과정 재생 ▶</button></p>
+      <div class="tokline" id="genLine" style="min-height:44px"></div>
+      <figcaption>완성된 답을 먼저 만들어 꺼내는 것이 아니라, 방금 생성한 토큰까지 다시 조건으로 사용하며 다음 토큰을 선택한다.</figcaption>
+    </div>
+    <div class="formula fx">P(y<sub>1</sub>, y<sub>2</sub>, …, y<sub>n</sub> | x) = ∏<sub>t=1</sub><sup>n</sup> P(y<sub>t</sub> | x, y<sub>1</sub>, …, y<sub>t−1</sub>)<br><span style="font-family:var(--sans);font-size:.8rem;color:var(--ink-soft)">각 토큰은 입력 x와 앞서 생성한 토큰들을 조건으로 차례로 선택된다. 계산할 필요는 없고 구조만 이해하면 된다.</span></div>
+  </div>
+</section>
+
+<section class="frame" data-ch="02 원리">
+  <div class="fwrap">
+    <h2 class="title fx">짧은 활동: 다음 표현을 예측해 보기<span class="rule"></span></h2>
+    <div class="card fx" style="text-align:center;font-family:var(--serif);font-size:1.08rem;padding:26px">"학교 현장의 업무 부담을 줄이기 위해서는 우선 <span class="cursorbar"></span>"</div>
+    <ul class="plain fx" style="margin-top:14px"><li>사람마다 서로 다른 자연스러운 후보를 제시할 수 있다.</li><li>앞부분만으로 다음 말이 하나로 결정되지 않는다.</li><li>같은 질문을 반복해도 표현과 세부 내용이 달라질 수 있다.</li></ul>
+    <div class="callout fx">확률적 생성은 다양성의 원인이면서, 검증이 필요한 이유이기도 하다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="02 원리">
+  <div class="fwrap">
+    <h2 class="title fx">자연스러운 문장과 사실은 다르다<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:16px">
+      <div class="col-good fx"><h4>언어적 자연스러움</h4><p>문맥에서 다음에 올 법한 토큰이 매끄럽게 이어진 결과</p></div>
+      <div class="col-bad fx"><h4>사실의 정확성</h4><p>원문, 데이터, 법령, 날짜와 대조하여 확인해야 하는 별도의 문제</p></div>
+    </div>
+    <div class="quote fx" style="margin-top:14px">문장이 그럴듯하다는 사실은<br><em>내용이 참이라는 보장이 아니다</em>.</div>
+  </div>
+</section>
+
+<!-- ═══ 03 ═══ -->
+<section class="frame" id="s3" data-ch="03 오류">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">03</span>KV cache, 긴 대화, 그리고 오류<span class="timechip">15분</span></span>
+    <h2 class="title">KV cache: 이미 한 계산을 다시 쓰는 메모<span class="rule"></span></h2></div>
+    <div class="flow fx">
+      <div class="node">이미 처리한 토큰들</div><span class="arrow">→</span>
+      <div class="node">K·V 계산 결과 임시 저장</div><span class="arrow">→</span>
+      <div class="node">새 토큰</div><span class="arrow">→</span>
+      <div class="node hot">다음 토큰 계산</div>
+    </div>
+    <div class="twocol">
+      <div class="col-good fx"><h4>하는 일</h4><p>생성 속도를 높이기 위해 이전 Attention 계산을 재사용</p></div>
+      <div class="col-bad fx"><h4>하지 않는 일</h4><p>대화 내용을 모델의 영구 지식으로 학습</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="03 오류">
+  <div class="fwrap">
+    <h2 class="title fx">긴 문맥: 많이 넣을 수 있음과 잘 쓰는 것은 다르다<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:16px">
+      <div class="col-good fx"><h4>장점</h4><ul class="plain"><li>긴 보고서와 여러 파일을 함께 제공</li><li>앞선 대화와 작업 조건을 참고</li><li>여러 근거를 한 번에 비교</li></ul></div>
+      <div class="col-bad fx"><h4>한계</h4><ul class="plain"><li>핵심 지시가 자료에 묻힘</li><li>서로 충돌하는 조건이 혼재</li><li>관련 없는 부분을 근거로 연결</li><li>처리 시간과 메모리 증가</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="03 오류">
+  <div class="fwrap">
+    <h2 class="title fx">Lost in the Middle<span class="rule"></span></h2>
+    <div class="fig fx">
+      <svg viewBox="0 0 640 260" style="width:100%;height:auto" role="img" aria-label="위치별 활용 성능 곡선">
+        <line x1="60" y1="215" x2="600" y2="215" stroke="#0A2E66" stroke-width="1.4"/>
+        <line x1="60" y1="215" x2="60" y2="26" stroke="#0A2E66" stroke-width="1.4"/>
+        <text x="330" y="246" text-anchor="middle" font-size="14" font-family="Noto Sans KR" fill="#33517E">정보의 위치</text>
+        <text x="30" y="120" font-size="14" font-family="Noto Sans KR" fill="#33517E" transform="rotate(-90 30 120)" text-anchor="middle">활용 성능</text>
+        <path d="M 80 55 C 200 55, 240 178, 330 178 C 420 178, 460 50, 580 50" fill="none" stroke="#42A5F5" stroke-width="4" stroke-linecap="round"/>
+        <g font-size="13.5" font-family="Noto Sans KR" fill="#0A2E66">
+          <text x="85" y="43" text-anchor="middle">처음 · 초두 편향</text>
+          <text x="330" y="202" text-anchor="middle" fill="#1565C0" font-weight="700">중간 · 활용 저하</text>
+          <text x="575" y="38" text-anchor="middle">끝 · 최신 편향</text>
+        </g>
+      </svg>
+      <figcaption>같은 핵심 정보라도 긴 입력의 중간에 있을 때 활용 성능이 낮아질 수 있다 — 다중 문서 질의응답, key–value 검색, 검색 문서가 많은 RAG에서 관찰되었다.</figcaption>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="03 오류">
+  <div class="fwrap">
+    <h2 class="title fx">중요한 정보가 중간에서 사라지지 않게 하려면<span class="rule"></span></h2>
+    <div class="steps" style="margin-top:16px">
+      <div class="step fx"><b>샌드위치 구조</b><p>핵심 지시는 앞, 형식·검증은 끝에서 확인</p></div>
+      <div class="step fx"><b>검색 결과 재정렬</b><p>관련성이 높은 문서를 앞쪽에 배치</p></div>
+      <div class="step fx"><b>문맥 축소</b><p>중복·관련 없는 자료 제거</p></div>
+      <div class="step fx"><b>단계로 나누기</b><p>구간별 근거 추출 후 최종 판단</p></div>
+      <div class="step fx"><b>근거 직접 검증</b><p>사용한 문장과 문서명을 함께 제시</p></div>
+    </div>
+    <div class="callout fx">자료를 많이 주면 무조건 정확해지는 것은 아니다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="03 오류">
+  <div class="fwrap">
+    <h2 class="title fx">환각은 왜 생기는가<span class="rule"></span></h2>
+    <div class="flow fx">
+      <div class="node">자료 부족·질문 모호</div><span class="arrow">→</span>
+      <div class="node">생성은 계속 진행</div><span class="arrow">→</span>
+      <div class="node">빈틈을 그럴듯하게 완성</div><span class="arrow">→</span>
+      <div class="node hot">가짜 날짜·수치·출처 생성</div>
+    </div>
+    <div class="callout teal fx"><b>환각을 줄이는 네 장치</b> — 원문 제공 · 추정 금지 · 사실/해석/제안 분리 · 원본 대조</div>
+  </div>
+</section>
+
+<!-- ═══ 04 ═══ -->
+<section class="frame" id="s4" data-ch="04 학습·추론">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">04</span>학습과 추론은 어떻게 다른가<span class="timechip">15분</span></span>
+    <h2 class="title">파일을 읽는 것, 기억하는 것, 모델을 바꾸는 것을 구분한다<span class="rule"></span></h2></div>
+    <div class="vs" style="margin-top:18px">
+      <div class="card fx" style="border-top:4px solid var(--seal)"><h3 style="color:var(--seal)">학습 Training</h3>
+        <div class="flow" style="margin:12px 0;flex-direction:column;gap:4px"><div class="node">대규모 데이터</div><span class="arrow">↓</span><div class="node">예측과 정답 비교</div><span class="arrow">↓</span><div class="node">가중치 수정</div></div>
+        <p>모델의 능력과 처리 습관 자체를 장기간 조정</p></div>
+      <div class="card fx" style="border-top:4px solid var(--teal)"><h3 style="color:var(--teal)">추론 Inference</h3>
+        <div class="flow" style="margin:12px 0;flex-direction:column;gap:4px"><div class="node">프롬프트·자료</div><span class="arrow">↓</span><div class="node">고정된 모델 사용</div><span class="arrow">↓</span><div class="node">현재 작업 출력</div></div>
+        <p>이미 학습된 모델로 현재 문제를 해결</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="04 학습·추론">
+  <div class="fwrap">
+    <h2 class="title fx">자주 혼동하는 네 가지<span class="rule"></span></h2>
+    <div class="fx"><table>
+      <tr><th>방식</th><th>실제로 하는 일</th><th style="width:140px">기본 가중치 변경</th></tr>
+      <tr><td>프롬프트</td><td>현재 작업의 목적과 조건을 문맥에 제공</td><td>아니오</td></tr>
+      <tr><td>파일 첨부·RAG</td><td>외부 자료에서 관련 내용을 찾아 현재 문맥에 제공</td><td>아니오</td></tr>
+      <tr><td>대화 기억</td><td>사용자 정보나 이전 대화를 저장하여 다시 제공</td><td>대개 아니오</td></tr>
+      <tr><td>파인튜닝</td><td>특정 자료로 모델의 가중치를 추가 조정</td><td style="color:var(--seal);font-weight:700">예</td></tr>
+    </table></div>
+    <div class="callout fx">파일을 첨부하거나 오래 대화했다고 해서 기본 모델이 그 내용을 영구적으로 학습한 것은 아니다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="04 학습·추론">
+  <div class="fwrap">
+    <h2 class="title fx">O/X로 확인하기 <span style="font-size:.78rem;color:var(--ink-soft);font-weight:400">— 문항을 눌러 답을 확인해 보자</span><span class="rule"></span></h2>
+    <div class="quiz" style="margin-top:16px">
+      <div class="q fx"><div class="qbody"><p class="qt">1. "보고서를 첨부했으므로 모델이 그 보고서를 학습했다."</p><p class="why">첨부는 현재 문맥에 자료를 제공할 뿐, 가중치를 바꾸지 않는다.</p></div><span class="ans x">X</span></div>
+      <div class="q fx"><div class="qbody"><p class="qt">2. "같은 대화 안에서는 앞서 준 지시를 참고할 수 있다."</p><p class="why">같은 문맥 창 안의 내용은 다음 토큰 선택의 조건으로 쓰인다.</p></div><span class="ans o">O</span></div>
+      <div class="q fx"><div class="qbody"><p class="qt">3. "오래 대화하면 기본 모델의 지식이 자동으로 영구 수정된다."</p><p class="why">대화 길이는 문맥을 늘릴 뿐이고, 가중치 수정은 별도의 학습 과정이다.</p></div><span class="ans x">대개 X</span></div>
+      <div class="q fx"><div class="qbody"><p class="qt">4. "검색 결과를 제공받아 답해도 기본 가중치는 그대로일 수 있다."</p><p class="why">RAG는 추론 시점에 문맥을 보강하는 방식이다.</p></div><span class="ans o">O</span></div>
+    </div>
+    <p class="fx" style="font-size:.82rem;color:var(--ink-soft);margin-top:10px">답을 고른 뒤, 왜 그런지 한 문장으로 설명해 본다.</p>
+  </div>
+</section>
+
+<section class="frame" data-ch="04 학습·추론">
+  <div class="fwrap">
+    <div class="quote fx">프롬프트는 모델의 능력 자체를 바꾸는<br>마법의 주문이 아니라,<br><em>현재 문제를 해결할 작업 공간과<br>판단 조건을 설계하는 문서</em>이다.</div>
+    <p class="fx" style="text-align:center;font-size:.9rem;color:var(--ink-soft);margin-top:12px">이제 이 원리를 실제 업무 프롬프트의 구조로 옮겨 보자.</p>
+  </div>
+</section>
+
+<!-- ═══ 05 ═══ -->
+<section class="frame" id="s5" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">05</span>좋은 프롬프트의 여섯 요소<span class="timechip">25분</span></span>
+    <h2 class="title">원리에서 프롬프트로<span class="rule"></span></h2></div>
+    <div class="flow fx">
+      <div class="node">LLM의 성질<small>문맥에 따라 다음 토큰 생성</small></div><span class="arrow">→</span>
+      <div class="node">숨은 의도를<small>자동으로 알지 못함</small></div><span class="arrow">→</span>
+      <div class="node hot">업무 조건을<small>프롬프트에 명시</small></div>
+    </div>
+    <div class="callout fx">좋은 프롬프트는 문장을 화려하게 꾸미는 기술이 아니라, <b>AI가 업무를 오해하지 않도록 작업 경계를 만드는 기술</b>이다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <h2 class="title fx">목‑맥‑자‑형‑기‑검<span class="rule"></span></h2>
+    <div class="six" style="margin-top:20px">
+      <div class="el fx"><span class="hanja">目</span><b>목적</b><p>무엇을 왜 만들어야 하는가?</p></div>
+      <div class="el fx"><span class="hanja">脈</span><b>맥락</b><p>누구를 위한 어떤 상황인가?</p></div>
+      <div class="el fx"><span class="hanja">資</span><b>자료</b><p>어떤 문서·데이터를 근거로 쓰는가?</p></div>
+      <div class="el fx"><span class="hanja">形</span><b>형식</b><p>어떤 구조·길이·파일로 내놓는가?</p></div>
+      <div class="el fx"><span class="hanja">基</span><b>기준</b><p>무엇을 좋은 결과로 판단하는가?</p></div>
+      <div class="el fx"><span class="hanja">檢</span><b>검증</b><p>무엇을 추정하지 않고 어떻게 확인하는가?</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <h2 class="title fx">목적: 동사가 분명해야 한다<span class="rule"></span></h2>
+    <div class="vs" style="margin-top:14px">
+      <div class="fx"><div class="prompt" data-label="개선 전">"이 운영계획을 검토해 줘."</div><p style="font-size:.82rem;color:var(--ink-soft);margin-top:8px;text-align:center">법적 오류? 문장 교정? 실행 가능성 평가?</p></div>
+      <div class="fx"><div class="prompt good" data-label="개선 후">첨부한 운영계획에서 다음을 찾아라.
+1. 일정끼리 충돌하는 부분
+2. 담당자가 지정되지 않은 업무
+3. 예산 항목과 실행 내용이 연결되지 않는 부분
+원문 위치·문제점·수정 제안을 표로 작성하라.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <h2 class="title fx">맥락과 자료: 누구에게, 무엇을 근거로<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="card fx"><h3 style="color:var(--teal)">맥락</h3>
+        <div class="prompt good" data-label="예시" style="margin:12px 0;font-size:.79rem">"이 결과는 교육기관 부서장 회의에서 3분 동안 설명할 자료이다."</div>
+        <ul class="plain"><li>독자와 사용처</li><li>의사결정 수준</li><li>설명 시간과 정보 깊이</li></ul></div>
+      <div class="card fx"><h3 style="color:var(--teal)">자료</h3>
+        <div class="prompt good" data-label="예시" style="margin:12px 0;font-size:.79rem">"첨부한 2026년 운영계획과 실적표만 근거로 사용하라."</div>
+        <ul class="plain"><li>사용할 문서와 범위</li><li>제외할 자료</li><li>근거가 없을 때의 표시법</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <h2 class="title fx">형식과 기준: 결과의 틀과 품질을 함께 정한다<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="card fx"><h3 style="color:var(--teal)">형식</h3>
+        <p style="font-family:var(--mono);font-size:.8rem;background:var(--paper);border-radius:8px;padding:9px 12px;margin:12px 0">쟁점｜원문 근거｜현장 영향｜긴급도｜권고 조치</p>
+        <ul class="plain"><li>긴급도: 높음·중간·낮음</li><li>전체 10행 이내</li><li>표 또는 지정 파일로 출력</li></ul></div>
+      <div class="card fx"><h3 style="color:var(--teal)">기준 — 좋은 수정안의 조건</h3>
+        <ul class="plain" style="margin-top:12px"><li>실제로 수행 가능</li><li>담당자와 기한이 분명</li><li>문서의 핵심 취지를 유지</li><li>추가 예산은 별도 표시</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <h2 class="title fx">검증: AI가 스스로 확인할 절차를 넣는다<span class="rule"></span></h2>
+    <div class="fx"><div class="prompt good" data-label="검증 절차">작성 후 다음을 다시 확인하라.
+1. 모든 수치가 원본과 일치하는가?
+2. 기관명과 날짜를 임의로 만들지 않았는가?
+3. 사실과 제안이 구분되어 있는가?
+4. 확인할 수 없는 내용이 "확인 필요"로 표시되었는가?
+마지막에 검증 결과를 세 줄 이내로 덧붙여라.</div></div>
+    <div class="callout fx">검증은 결과를 만든 뒤 붙이는 장식이 아니라, 처음부터 작업에 포함하는 단계이다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="05 여섯 요소">
+  <div class="fwrap">
+    <h2 class="title fx">역할 부여보다 중요한 것<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="col-bad fx"><h4>약한 지시</h4><p>"당신은 최고의 문서 행정 전문가입니다."</p><p style="font-size:.82rem;margin-top:8px">결과의 방향은 조금 달라질 수 있지만 품질은 보장하지 않는다.</p></div>
+      <div class="col-good fx"><h4>강한 지시</h4><ul class="plain"><li>어떤 자료를 사용할지</li><li>어떤 기준으로 판단할지</li><li>어떤 형식으로 출력할지</li><li>무엇을 확인하고 보고할지</li></ul></div>
+    </div>
+    <div class="quote fx" style="padding-top:18px">페르소나보다 <em>자료·기준·검증</em>이 먼저이다.</div>
+  </div>
+</section>
+
+<!-- ═══ 06 ═══ -->
+<section class="frame" id="s6" data-ch="06 실습">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">06</span>프롬프트 개선 실습<span class="timechip">15분</span></span>
+    <h2 class="title">실습 1: 모호한 요청을 업무 지시서로 바꾸기<span class="rule"></span></h2></div>
+    <div class="fx"><div class="prompt" data-label="주어진 요청">"업무 만족도 조사 결과를 분석해 줘."</div></div>
+    <div class="twocol" style="margin-top:18px">
+      <div class="card fx"><h3>5분 동안 할 일</h3><ul class="plain"><li>여섯 요소 중 최소 네 가지 선택</li><li>실제 분석 방향이 달라지는 조건만 추가</li><li>문장을 무조건 길게 만들지 않기</li></ul></div>
+      <div class="card fx"><h3>공유할 때 설명할 것</h3><ul class="plain"><li>추가한 조건은 무엇인가?</li><li>결과의 어느 부분을 통제하는가?</li><li>빠뜨린 요소는 왜 필요하지 않은가?</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="06 실습">
+  <div class="fwrap">
+    <h2 class="title fx">예시 답안: 여섯 요소를 한 업무에 연결하기<span class="rule"></span></h2>
+    <div class="fx"><table>
+      <tr><th style="width:90px">요소</th><th>내용</th></tr>
+      <tr><td><b>목적</b></td><td>다음 학기 지원계획에서 우선 개선할 영역을 정한다.</td></tr>
+      <tr><td><b>대상</b></td><td>교육기관 내부 회의 자료이다.</td></tr>
+      <tr><td><b>분석</b></td><td>문항별 평균, 기관 유형별 차이, 응답이 낮은 세 문항을 찾는다.</td></tr>
+      <tr><td><b>형식</b></td><td>핵심 결과 5개와 권고 조치 3개를 표로 작성한다.</td></tr>
+      <tr><td><b>기준</b></td><td>작은 차이는 과장하지 않고, 응답자 수가 적은 집단은 표시한다.</td></tr>
+      <tr><td><b>검증</b></td><td>원본에 없는 원인을 추정하지 않고, 해석과 사실을 분리한다.</td></tr>
+    </table></div>
+    <div class="callout fx">좋은 프롬프트는 모든 칸을 길게 채운 문장이 아니라, 필요한 정보가 빠지지 않고 조건의 위계가 분명한 지시서이다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="06 실습">
+  <div class="fwrap">
+    <h2 class="title fx">실습 2: 복합 업무를 단계로 나누기<span class="rule"></span></h2>
+    <div class="flow fx">
+      <div class="node">1. 구조 확인</div><span class="arrow">→</span><div class="node">2. 오류 탐지</div><span class="arrow">→</span><div class="node hot">3. 규칙 승인</div><span class="arrow">→</span><div class="node">4. 집계표</div><span class="arrow">→</span><div class="node">5. 보고서</div><span class="arrow">→</span><div class="node">6. 저장·검증</div>
+    </div>
+    <p class="fx">복합 업무를 한 번에 시키면 오류가 어느 단계에서 생겼는지 추적하기 어렵다. 각 단계의 중간 결과를 확인한 뒤 다음 행동을 승인한다.</p>
+    <div class="callout fx">가장 중요한 프롬프트는 첫 문장이 아니라, <b>중간 결과를 보고 다음 행동을 결정하는 후속 프롬프트</b>일 수 있다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="06 실습">
+  <div class="fwrap">
+    <h2 class="title fx">서로의 프롬프트를 검토하는 기준<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="col-good fx"><h4>명료성</h4><ul class="plain"><li>수행 동사가 분명한가?</li><li>대상과 사용처가 드러나는가?</li><li>자료 범위가 한정되어 있는가?</li></ul></div>
+      <div class="col-good fx"><h4>안전성</h4><ul class="plain"><li>임의 추정을 금지했는가?</li><li>좋은 결과의 기준이 있는가?</li><li>검증 절차와 승인 지점이 있는가?</li></ul></div>
+    </div>
+    <p class="fx" style="text-align:center;margin-top:14px;font-size:.9rem;color:var(--ink-soft)">한 문장씩 칭찬하고, 한 조건만 개선한다.</p>
+  </div>
+</section>
+
+<!-- ═══ 07 ═══ -->
+<section class="frame" id="s7" data-ch="07 MCP">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">07</span>MCP: 대답하는 AI에 손을 연결하기<span class="timechip">10분</span></span>
+    <h2 class="title">MCP를 한 문장으로 설명하기<span class="rule"></span></h2></div>
+    <div class="flow fx">
+      <div class="node">사용자<small>자연어 요청</small></div><span class="arrow">→</span>
+      <div class="node">LLM<small>의도 판단</small></div><span class="arrow">도구 선택 →</span>
+      <div class="node hot">MCP<small>도구 연결</small></div><span class="arrow">실행 →</span>
+      <div class="node">Excel·HWP<small>파일·DB</small></div>
+    </div>
+    <p class="fx" style="text-align:center;font-size:.84rem;color:var(--ink-soft)">← 결과 반환</p>
+    <div class="callout fx">LLM이 두뇌라면 Excel과 HWP는 손이다. MCP는 두뇌의 판단을 손이 이해할 수 있는 구조화된 명령으로 연결한다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="07 MCP">
+  <div class="fwrap">
+    <h2 class="title fx">MCP가 하는 일과 보장하지 않는 일<span class="rule"></span></h2>
+    <div class="fx"><table>
+      <tr><th>MCP가 하는 일</th><th>MCP가 보장하지 않는 일</th></tr>
+      <tr><td>도구의 이름과 입력 형식을 AI에게 알려 줌</td><td>AI의 판단이 언제나 옳다는 보장</td></tr>
+      <tr><td>Excel 읽기·쓰기 같은 기능을 호출</td><td>올바른 셀과 파일을 선택한다는 보장</td></tr>
+      <tr><td>실행 결과를 AI에게 반환</td><td>원본 데이터가 정확하다는 보장</td></tr>
+      <tr><td>서로 다른 도구를 비슷한 방식으로 연결</td><td>모든 서버의 안전성과 품질 보장</td></tr>
+    </table></div>
+    <div class="callout fx">도구를 호출할 수 있다는 사실은 결과의 정확성과 안전성을 보장하지 않는다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="07 MCP">
+  <div class="fwrap">
+    <h2 class="title fx">실습에서 관찰할 다섯 단계<span class="rule"></span></h2>
+    <div class="flow fx">
+      <div class="node">1. 목적·조건</div><span class="arrow">→</span><div class="node">2. 도구 선택</div><span class="arrow">→</span><div class="node">3. 기능 실행</div><span class="arrow">→</span><div class="node">4. 결과 반환</div><span class="arrow">→</span><div class="node hot">5. 검증·승인</div>
+    </div>
+    <p class="fx">실습의 목적은 "AI가 마우스를 대신 움직이는 장면"이 아니라, 자연어 요청이 도구 호출로 바뀌고 실제 파일이 수정된 뒤 사람이 다시 확인하는 협업 구조 전체를 보는 것이다.</p>
+  </div>
+</section>
+
+<section class="frame" data-ch="07 MCP">
+  <div class="fwrap">
+    <h2 class="title fx">권한이 커질수록 검증도 강해져야 한다<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="col-good fx"><h4>최소 권한</h4><ul class="plain"><li>실습 폴더만 읽기·쓰기 허용</li><li>복사본과 가상 데이터 사용</li><li>서버 출처와 유지보수 상태 확인</li><li>지원 기능을 강의 전에 시험</li></ul></div>
+      <div class="col-bad fx"><h4>사용자 승인 필수</h4><ul class="plain"><li>원본 덮어쓰기</li><li>파일 삭제</li><li>외부 전송·업로드</li><li>임의 값 수정</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 08 ═══ -->
+<section class="frame" id="s8" data-ch="08 Excel">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">08</span>Excel MCP 실습<span class="timechip">25분</span></span>
+    <h2 class="title">실습 목표와 파일 구조<span class="rule"></span></h2></div>
+    <div class="twocol" style="margin-top:16px">
+      <div class="card fx"><h3>오늘의 목표</h3><ul class="plain"><li>원본 시트 보존</li><li>결측·비정상 값 탐지</li><li>기관 유형별 요약표 작성</li><li>새 파일 저장</li><li>계산 결과 표본 대조</li></ul></div>
+      <div class="card fx"><h3>원본 시트 열</h3>
+        <table style="font-size:.82rem"><tr><td style="width:40px"><b>A</b></td><td>기관명</td><td style="width:40px"><b>E</b></td><td>처리 건수</td></tr><tr><td><b>B</b></td><td>기관 유형</td><td><b>F</b></td><td>참여 인원</td></tr><tr><td><b>C</b></td><td>지역</td><td><b>G</b></td><td>만족도(1–5)</td></tr><tr><td><b>D</b></td><td>계획 건수</td><td><b>H</b></td><td>비고</td></tr></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="08 Excel">
+  <div class="fwrap">
+    <h2 class="title fx">의도적으로 넣어 둔 오류<span class="rule"></span></h2>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card fx"><p>만족도가 비어 있음</p></div>
+      <div class="card fx"><p>만족도가 5를 초과함</p></div>
+      <div class="card fx"><p>처리 건수가 계획 건수보다 많음</p></div>
+      <div class="card fx"><p>기관명이 중복됨</p></div>
+      <div class="card fx"><p>숫자 열에 문자가 들어 있음</p></div>
+      <div class="card fx"><p>확인이 필요한 비고가 존재</p></div>
+    </div>
+    <div class="callout fx">목표는 AI가 값을 빨리 고치는지 보는 것이 아니다. <b>이상값을 먼저 보고하고 사람의 규칙을 기다리는지</b> 확인한다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="08 Excel">
+  <div class="fwrap">
+    <h2 class="title fx">1단계 [4분]: 파일 구조만 확인하기<span class="rule"></span></h2>
+    <div class="fx"><div class="prompt good" data-label="프롬프트">현재 열려 있는 기관별_사업실적_실습.xlsx를 읽어라. 아직 어떤 셀도 수정하지 마라.
+1. 시트 이름과 원본 시트의 행·열 수
+2. 각 열의 이름
+3. 비어 있는 셀의 개수
+4. 숫자 열이지만 숫자가 아닌 값의 위치
+확인 결과를 표로 보여 주고 수정 작업은 내 승인을 기다려라.</div></div>
+    <div class="callout teal fx">실행보다 확인을 먼저 — AI가 어떤 파일과 범위를 선택했는지 사람이 확인한다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="08 Excel">
+  <div class="fwrap">
+    <h2 class="title fx">2·3단계: 원본 보존과 오류표, 승인된 규칙으로 요약표<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="card fx"><h3>2단계 [6분]</h3>
+        <ul class="plain"><li>원본 시트를 작업본으로 복제</li><li>새 시트 검증결과 생성</li><li>값을 고치지 않고 오류만 기록</li></ul>
+        <p style="font-size:.83rem;margin:10px 0 4px"><b>검증결과 열</b> — 행 번호 / 기관명 / 오류 유형 / 원래 값 / 조치 제안</p>
+        <div class="callout" style="margin-top:10px;font-size:.83rem">값을 임의로 고치지 말고 오류만 표시한다.</div></div>
+      <div class="card fx"><h3>3단계 [8분]</h3>
+        <p style="font-size:.83rem;margin-bottom:4px"><b>사람이 먼저 정할 규칙</b></p>
+        <ul class="plain"><li>만족도 결측은 평균에서 제외</li><li>범위 밖 값은 임의 수정 금지</li><li>계획보다 큰 처리 건수는 확인 대상 유지</li></ul>
+        <p style="font-size:.83rem;margin:10px 0 4px"><b>요약 시트 항목</b> — 기관 수 / 계획·처리 합계 / 이행률 / 참여 인원 합계 / 유효 만족도 평균</p>
+        <div class="callout teal" style="margin-top:10px;font-size:.83rem">가능하면 값이 아니라 Excel 수식으로 작성한다.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="08 Excel">
+  <div class="fwrap">
+    <h2 class="title fx">4단계 [7분]: 새 파일 저장과 검증<span class="rule"></span></h2>
+    <div class="fx"><div class="prompt good" data-label="프롬프트">기관별_사업실적_분석결과.xlsx로 저장하라. 원본 파일은 덮어쓰지 마라.
+1. 원본·작업본·검증결과·요약 시트가 모두 있는가?
+2. 원본 시트의 값이 변경되지 않았는가?
+3. 기관 수 합계가 분석 대상 기관 수와 일치하는가?
+4. 기관 유형 하나의 이행률을 다시 계산해도 일치하는가?</div></div>
+  </div>
+</section>
+
+<section class="frame" data-ch="08 Excel">
+  <div class="fwrap">
+    <h2 class="title fx">강사가 반드시 보여 줄 검산<span class="rule"></span></h2>
+    <div class="formula fx">이행률 = <span class="frac"><span>처리 건수 합계</span><span>계획 건수 합계</span></span> × 100%</div>
+    <p class="fx" style="font-size:.88rem;margin-bottom:10px">참여자는 실제 Excel 파일을 열어 다음을 직접 확인한다. <span style="color:var(--ink-soft);font-size:.8rem">(확인한 항목을 눌러 표시해 보자)</span></p>
+    <div class="checks">
+      <label class="fx"><input type="checkbox"><span>원본 시트가 그대로 남아 있다.</span></label>
+      <label class="fx"><input type="checkbox"><span>오류값이 자동으로 조용히 수정되지 않았다.</span></label>
+      <label class="fx"><input type="checkbox"><span>요약표 수식 하나를 원자료와 대조하였다.</span></label>
+    </div>
+    <div class="callout fx">표본 검산의 목적은 모든 값을 다시 계산하는 것이 아니라, <b>수식과 집계 범위가 사람의 규칙과 일치하는지</b> 확인하는 것이다.</div>
+  </div>
+</section>
+
+<!-- ═══ 09 ═══ -->
+<section class="frame" id="s9" data-ch="09 HWP">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">09</span>HWP MCP 실습<span class="timechip">20분</span></span>
+    <h2 class="title">20분 실습은 템플릿 방식으로 제한한다<span class="rule"></span></h2></div>
+    <div class="twocol" style="margin-top:16px">
+      <div class="col-bad fx"><h4>처음부터 자유 작성</h4><ul class="plain"><li>서식과 위치 조정에 시간 소모</li><li>구조가 조금만 달라도 실패</li><li>결과 검증 시간이 부족</li></ul></div>
+      <div class="col-good fx"><h4>템플릿 채우기</h4><ul class="plain"><li>기존 글꼴·문단·표 구조 유지</li><li>수정 위치를 자리표시자로 명시</li><li>내용 검증과 서식 보존을 함께 경험</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="09 HWP">
+  <div class="fwrap">
+    <h2 class="title fx">템플릿의 자리표시자<span class="rule"></span></h2>
+    <div class="fx"><table>
+      <tr><th style="width:160px">자리표시자</th><th>들어갈 내용</th></tr>
+      <tr><td><span class="ph">{{제목}}</span></td><td>보고서 제목</td></tr>
+      <tr><td><span class="ph">{{작성부서}}</span></td><td>부서명</td></tr>
+      <tr><td><span class="ph">{{작성일}}</span></td><td>작성일</td></tr>
+      <tr><td><span class="ph">{{분석대상}}</span></td><td>분석한 기관 수와 기간</td></tr>
+      <tr><td><span class="ph">{{핵심결과}}</span></td><td>Excel 요약표의 핵심 결과</td></tr>
+      <tr><td><span class="ph">{{확인사항}}</span></td><td>오류·결측값과 추가 확인 사항</td></tr>
+      <tr><td><span class="ph">{{향후조치}}</span></td><td>실행 가능한 후속 조치</td></tr>
+    </table></div>
+    <div class="callout fx">자리표시자 이름이 중복되거나 오탈자가 있으면 잘못된 위치가 수정된다. 목록 확인 후 교체를 승인한다.</div>
+  </div>
+</section>
+
+<section class="frame" data-ch="09 HWP">
+  <div class="fwrap">
+    <h2 class="title fx">1–2단계 [10분]: 구조 확인 후 문장 초안 검증<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="card fx"><h3>1. 템플릿 확인</h3>
+        <ul class="plain"><li>자리표시자 목록 찾기</li><li>주변 제목과 위치 보고</li><li>누락·중복 여부 확인</li><li>아직 문서를 수정하지 않기</li></ul></div>
+      <div class="card fx"><h3>2. 보고서 문장 초안</h3>
+        <ul class="plain"><li>핵심결과: 수치 중심 3개</li><li>확인사항: 오류·추가 확인 2개 이내</li><li>향후조치: 실행 가능한 조치 3개</li><li>사실과 제안을 분리</li><li>Excel에 없는 원인은 추정하지 않기</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="09 HWP">
+  <div class="fwrap">
+    <h2 class="title fx">3단계 [6분]: 자리표시자 교체와 새 파일 저장<span class="rule"></span></h2>
+    <div class="fx"><div class="prompt good" data-label="프롬프트">승인한 문장으로 템플릿의 자리표시자를 교체하라.
+· 제목: 2026년 기관별 사업 운영 실적 분석 결과
+· 작성부서·작성일·분석대상 입력
+· 핵심결과·확인사항·향후조치에는 승인한 문장 사용
+· 원본을 덮어쓰지 않고 2026년_사업운영_결과보고서.hwpx로 저장
+· 기존 글꼴·문단 모양·표 크기는 변경하지 않기</div></div>
+  </div>
+</section>
+
+<section class="frame" data-ch="09 HWP">
+  <div class="fwrap">
+    <h2 class="title fx">4단계 [4분]: 결과 검증<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="card fx"><h3>검증 목록</h3>
+        <div class="checks" style="margin-top:10px">
+          <label><input type="checkbox"><span>모든 자리표시자가 제거되었다.</span></label>
+          <label><input type="checkbox"><span>Excel과 문서의 수치가 같다.</span></label>
+          <label><input type="checkbox"><span>제목·부서·작성일이 들어갔다.</span></label>
+          <label><input type="checkbox"><span>원본 템플릿이 보존되었다.</span></label>
+          <label><input type="checkbox"><span>빈 문단과 깨진 표가 없다.</span></label>
+        </div></div>
+      <div class="card fx"><h3>문제가 발견되면</h3><p style="font-size:.88rem;margin:8px 0">자동으로 임의 수정하지 말고 다음을 먼저 보고한다.</p>
+        <div class="steps"><div class="step"><b>위치</b></div><div class="step"><b>문제 내용</b></div><div class="step"><b>가능한 조치</b></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame" data-ch="09 HWP">
+  <div class="fwrap">
+    <h2 class="title fx">HWP MCP는 하나의 동일한 제품이 아니다<span class="rule"></span></h2>
+    <div class="twocol" style="margin-top:14px">
+      <div class="card fx"><h3>구현 방식의 예</h3>
+        <ul class="plain"><li>Windows 한글 Automation 사용</li><li>HWPX 파일 구조를 직접 읽고 수정</li><li>제한된 자리표시자 교체 기능만 제공</li></ul></div>
+      <div class="card fx"><h3>강의 전에 확인할 것</h3>
+        <ul class="plain"><li>지원 파일 형식</li><li>편집 가능한 요소</li><li>서식 보존 수준</li><li>저장·복사 기능</li><li>동일 템플릿 반복 시험</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 ═══ -->
+<section class="frame dark" id="s10" data-ch="10 마무리">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow" style="color:#9BD0F8"><span class="stamp" style="border-color:#9BD0F8;color:#9BD0F8">10</span>마무리: AI와 업무를 어떻게 나눌 것인가<span class="timechip" style="background:#9BD0F8">7분</span></span>
+    <h2 class="title" style="color:#F4F9FF">판단과 책임은 사람에게,<br>반복 실행은 검증 가능한 방식으로 AI에게<span class="rule"></span></h2></div>
+    <div class="twocol" style="margin-top:22px">
+      <div class="card fx"><h3 style="color:#9BD0F8">사람이 책임질 것</h3>
+        <ul class="plain"><li>목적과 우선순위 결정</li><li>사용할 자료와 권한 설정</li><li>판단 기준과 예외 규칙 승인</li><li>중간 결과 검토</li><li>최종 결과의 책임</li></ul></div>
+      <div class="card fx"><h3 style="color:#8EC9F5">AI에게 분담할 것</h3>
+        <ul class="plain"><li>반복적인 자료 탐색과 정리</li><li>초안과 표 구조 생성</li><li>승인된 규칙에 따른 계산</li><li>도구 선택과 기능 호출</li><li>검증 항목의 1차 점검</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame dark" data-ch="10 마무리">
+  <div class="fwrap">
+    <h2 class="title fx" style="color:#F4F9FF">마지막 한 장<span class="rule"></span></h2>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card fx"><p><b style="color:#9BD0F8">1</b> LLM은 다음 토큰을 하나씩 생성한다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">2</b> Attention은 문맥의 관계를 계산한다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">3</b> KV cache는 계산 재사용 메모이지 학습이 아니다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">4</b> 긴 문맥에서는 중간 정보의 활용이 낮아질 수 있다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">5</b> 프롬프트는 현재 업무의 지시서이다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">6</b> 좋은 지시는 목·맥·자·형·기·검을 포함한다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">7</b> MCP는 판단을 실제 도구 실행에 연결한다.</p></div>
+      <div class="card fx"><p><b style="color:#9BD0F8">8</b> 원본 보존·승인·검산이 자동화보다 먼저이다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="frame dark" data-ch="10 마무리">
+  <div class="fwrap">
+    <div class="quote fx" style="color:#F4F9FF">좋은 협업의 기준은<br>AI가 얼마나 놀라운 결과를 냈는가가 아니라<br><em>업무가 더 명료하고, 재현 가능하며,<br>안전해졌는가</em>이다.</div>
+    <p class="fx" style="text-align:center;font-family:var(--serif);font-size:1.5rem;font-weight:900;margin-top:26px;color:#F4F9FF">감사합니다</p>
+  </div>
+</section>
+
+<!-- ═══ 부록 ═══ -->
+<section class="frame" id="appx" data-ch="부록" style="align-items:flex-start;padding-top:90px">
+  <div class="fwrap">
+    <div class="fx"><span class="eyebrow"><span class="stamp">附</span>부록</span>
+    <h2 class="title">운영·문제 해결·근거 자료<span class="rule"></span></h2></div>
+    <div class="fx" style="margin-top:14px">
+    <details class="appx"><summary>부록 A — 3시간 시간 통제 원칙</summary><div class="body">
+      <table><tr><th>구분</th><th>운영 방식</th></tr>
+      <tr><td>개념 설명</td><td>수식 유도 대신 도식과 대표 예시를 사용</td></tr>
+      <tr><td>참여자 질문</td><td>프롬프트 실습 직전과 마무리에서 묶어 처리</td></tr>
+      <tr><td>프롬프트 실습</td><td>여러 사례 대신 자신의 업무 사례 한 건을 완성</td></tr>
+      <tr><td>Excel 실습</td><td>파일 확인–오류표–요약표–저장을 연속 실행</td></tr>
+      <tr><td>HWP 실습</td><td>동일 템플릿을 사용하고 검산에 시간을 우선 배분</td></tr>
+      <tr><td>오류 대응</td><td>예비 환경이나 중간 결과 파일로 즉시 전환</td></tr></table>
+      <p style="margin-top:10px">압축의 대상은 핵심 내용이 아니라 반복 설명과 대기 시간이다.</p></div></details>
+    <details class="appx"><summary>부록 B — MCP 도구가 보이지 않을 때</summary><div class="body"><ol style="padding-left:20px;display:grid;gap:5px">
+      <li>AI 클라이언트를 완전히 종료하고 다시 실행한다.</li><li>MCP 서버 프로세스가 실행 중인지 확인한다.</li><li>설정 파일 경로와 실행 명령을 확인한다.</li><li>서버가 요구하는 Python·Node.js 버전을 확인한다.</li><li>HWP·Excel 프로그램의 설치 여부와 권한을 확인한다.</li></ol>
+      <p style="margin-top:10px">연결 문제를 현장에서 장시간 추적하지 말고 예비 환경으로 전환한다.</p></div></details>
+    <details class="appx"><summary>부록 C — 파일은 읽지만 수정하지 못할 때</summary><div class="body"><div class="twocol">
+      <div><b>파일·권한</b><ul class="plain"><li>읽기 전용 파일인지 확인</li><li>다른 프로그램이 파일을 잠갔는지 확인</li><li>실습 폴더에 쓰기 권한이 있는지 확인</li></ul></div>
+      <div><b>도구 기능</b><ul class="plain"><li>서버가 쓰기 도구를 제공하는지 확인</li><li>다른 이름으로 저장 기능 확인</li><li>원본이 아닌 복사본으로 재시도</li></ul></div></div></div></details>
+    <details class="appx"><summary>부록 D — HWP 서식이 깨질 때</summary><div class="body"><ol style="padding-left:20px;display:grid;gap:5px">
+      <li>자유 편집 대신 자리표시자 교체 방식으로 단순화한다.</li><li>복잡한 표 삽입을 중단하고 기존 표의 셀만 채운다.</li><li>서버가 더 안정적으로 지원하는 HWP/HWPX 형식을 사용한다.</li><li>결과를 저장한 뒤 한글 프로그램에서 직접 열어 확인한다.</li></ol></div></details>
+    <details class="appx"><summary>부록 E — 보안과 책임의 최소 원칙</summary><div class="body"><div class="twocol">
+      <ul class="plain"><li>가상 기관명과 비식별 자료 사용</li><li>개인정보·건강정보·평가 자료 입력 금지</li><li>MCP 접근 폴더를 실습 폴더로 제한</li><li>삭제·전송·업로드 자동 승인 금지</li></ul>
+      <ul class="plain"><li>원본을 복사하고 다른 이름으로 저장</li><li>숫자·법령·날짜·기관명을 원문과 대조</li><li>결과물의 최종 책임은 승인한 사람과 기관에 있음</li></ul></div></div></details>
+    <details class="appx"><summary>부록 F — 기술적 근거</summary><div class="body"><ul class="plain">
+      <li>Vaswani et al., <i>Attention Is All You Need</i>, 2017.</li>
+      <li>Liu et al., <i>Lost in the Middle</i>, TACL, 2024.</li>
+      <li>Hsieh et al., <i>Found in the Middle</i>, Findings of ACL, 2024.</li>
+      <li>Hugging Face Transformers Documentation, KV cache strategies.</li>
+      <li>OpenAI·Anthropic 공식 프롬프트 작성 안내.</li>
+      <li>Model Context Protocol 공식 문서와 각 MCP 서버의 기능·보안 문서.</li></ul>
+      <p style="margin-top:10px">모델·클라이언트·MCP 구현의 기능은 바뀔 수 있으므로, 실제 강의 환경은 사용 직전에 다시 확인한다.</p></div></details>
+    </div>
+    <p style="text-align:center;color:var(--ink-soft);font-size:.78rem;padding:26px 0 6px">대답하는 AI에서 일하는 AI로 · 강사 유익승 · 15:00–18:00</p>
+  </div>
+</section>
+
+<script>
+const frames=[...document.querySelectorAll('section.frame')];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// 프레임마다 .fx 순번 부여 → 순차 등장 지연
+frames.forEach(f=>f.querySelectorAll('.fx').forEach((el,i)=>el.style.setProperty('--i',Math.min(i,8))));
+
+// ── 활성 프레임 판정: 화면 중앙이 속한 프레임 ──
+let cur=-1;
+function setActive(){
+  const mid=innerHeight/2;
+  let idx=0;
+  for(let i=0;i<frames.length;i++){
+    const r=frames[i].getBoundingClientRect();
+    if(r.top<=mid&&r.bottom>mid){idx=i;break}
+    if(r.top>mid)break;
+    idx=i;
+  }
+  if(idx===cur)return;
+  cur=idx;
+  frames.forEach((f,i)=>{
+    if(i===idx)f.classList.add('active');
+    else if(Math.abs(i-idx)>1)f.classList.remove('active'); // 다시 오면 재등장
+  });
+  // 카운터·챕터
+  document.querySelector('#counter .num').textContent=(idx+1)+' / '+frames.length;
+  document.querySelector('#counter .ch').textContent=frames[idx].dataset.ch||'';
+  // 내비 활성
+  const ch=frames[idx].dataset.ch;
+  document.querySelectorAll('#toc a').forEach(a=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    a.classList.toggle('active',t&&t.dataset.ch===ch);
+  });
+  if(idx===0)playHero();
+}
+
+// ── 진행 막대 ──
+const prog=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  setActive();
+},{passive:true});
+addEventListener('resize',setActive);
+
+// ── 프레임 이동 ──
+function go(d){
+  const next=Math.min(Math.max(cur+d,0),frames.length-1);
+  frames[next].scrollIntoView({behavior:reduced?'auto':'smooth'});
+}
+document.getElementById('btnNext').addEventListener('click',()=>go(1));
+document.getElementById('btnPrev').addEventListener('click',()=>go(-1));
+addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea,summary'))return;
+  if(['ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();go(1)}
+  if(['ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(-1)}
+  if(e.key==='Home'){e.preventDefault();frames[0].scrollIntoView()}
+  if(e.key==='End'){e.preventDefault();frames[frames.length-1].scrollIntoView()}
+});
+
+// ── 히어로: 중심 문장을 토큰 단위로 생성 ──
+const heroToks=['LLM','은',' 앞에',' 주어진',' 문맥','을',' 바탕으로',' 다음',' 토큰','을',' 하나','씩',' 선택','한다','.'];
+const heroBox=document.getElementById('heroTokens');
+let heroPlaying=false;
+function playHero(){
+  if(reduced){heroBox.textContent=heroToks.join('');heroBox.style.color='#F4F9FF';heroBox.style.fontFamily='var(--mono)';return}
+  if(heroPlaying)return;heroPlaying=true;
+  heroBox.innerHTML='';
+  heroToks.forEach((t,i)=>{
+    const s=document.createElement('span');s.className='tok gen';s.textContent=t;heroBox.appendChild(s);
+    setTimeout(()=>s.classList.add('pop'),400+i*240);
+  });
+  const c=document.createElement('span');c.className='cursorbar';heroBox.appendChild(c);
+  setTimeout(()=>{heroPlaying=false},400+heroToks.length*240+800);
+}
+
+// ── 02: 생성 과정 재생 ──
+const genToks=['우선',' 업무',' 절차','를',' 표준','화','하는',' 것','이',' 필요','하다','.'];
+document.getElementById('genBtn').addEventListener('click',()=>{
+  const box=document.getElementById('genLine');box.innerHTML='';
+  genToks.forEach((t,i)=>{
+    const s=document.createElement('span');s.className='tok gen';s.textContent=t;box.appendChild(s);
+    setTimeout(()=>s.classList.add('pop'),i*300);
+  });
+});
+
+// ── Attention ──
+document.getElementById('attnBtn').addEventListener('click',function(){
+  const d=document.getElementById('attnDemo');d.classList.toggle('armed');
+  this.textContent=d.classList.contains('armed')?'초기화':'참고 강도 보기';
+});
+
+// ── O/X ──
+document.querySelectorAll('.q').forEach(q=>q.addEventListener('click',()=>q.classList.toggle('open')));
+
+setActive();
+</script>
+</body>
+</html>
